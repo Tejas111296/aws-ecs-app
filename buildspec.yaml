@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 010928197218.dkr.ecr.us-east-2.amazonaws.com
+      - REPO_URI=010928197218.dkr.ecr.us-east-2.amazonaws.com/tondase-ecs-repo
+      - IMAGE_TAG=$CODEBUILD_RESOLVED_SOURCE_VERSION
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - docker build -t $REPO_URI:$IMAGE_TAG .
+      - docker push $REPO_URI:$IMAGE_TAG
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - printf '[{"name":"tondase-app","imageUri":"%s"}]' "$REPO_URI:$IMAGE_TAG" > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
