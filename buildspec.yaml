@@ -10,13 +10,13 @@ phases:
 
   build:
     commands:
-      - echo Build started on `date`
+      - echo "Build started on $(date)"
       - docker build -t $REPO_URI:$IMAGE_TAG .
       - docker push $REPO_URI:$IMAGE_TAG
 
   post_build:
     commands:
-      - echo Build completed on `date`
+      - echo "Build completed on $(date)"
       - printf '[{"name":"tondase-app","imageUri":"%s"}]' "$REPO_URI:$IMAGE_TAG" > imagedefinitions.json
 
 artifacts:
