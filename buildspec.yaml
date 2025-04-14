@@ -9,20 +9,21 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $REPO_URI
+      - aws ecr get-login-password --region $AWS_REGION > login.txt
+      - docker login --username AWS --password-stdin $REPO_URI < login.txt
       - IMAGE_TAG=$CODEBUILD_RESOLVED_SOURCE_VERSION
 
   build:
     commands:
-      - echo "Build started on `date`"
-      - echo "Building Docker image..."
+      - echo Build started on `date`
+      - echo Building Docker image...
       - docker build -t $REPO_URI:$IMAGE_TAG .
-      - echo "Pushing image to ECR..."
+      - echo Pushing image to ECR...
       - docker push $REPO_URI:$IMAGE_TAG
 
   post_build:
     commands:
-      - echo "Build completed on `date`"
+      - echo Build completed on `date`
       - printf '[{"name":"tondase-app","imageUri":"%s"}]' "$REPO_URI:$IMAGE_TAG" > imagedefinitions.json
 
 artifacts:
